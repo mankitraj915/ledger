@@ -62,18 +62,23 @@ def install_request_logging(app: FastAPI) -> None:
         request_id = incoming if _SAFE_REQUEST_ID.match(incoming) else uuid.uuid4().hex
         token = request_id_var.set(request_id)
         started = time.perf_counter()
+        fields: dict[str, object] = {"method": request.method, "path": request.url.path}
         try:
-            response = await call_next(request)
-            log.info(
-                "http.request",
-                extra={
-                    "method": request.method,
-                    "path": request.url.path,
-                    "status": response.status_code,
-                    "duration_ms": round((time.perf_counter() - started) * 1000, 2),
-                },
-            )
+            try:
+                response = await call_next(request)
+            except Exception:
+                # Logged here, while the request id is still bound. The 500 envelope
+                # itself comes from the outermost error handler in app.errors.
+                fields.update(status=500, duration_ms=_elapsed_ms(started))
+                log.exception("http.request", extra=fields)
+                raise
+            fields.update(status=response.status_code, duration_ms=_elapsed_ms(started))
+            log.info("http.request", extra=fields)
         finally:
             request_id_var.reset(token)
         response.headers[REQUEST_ID_HEADER] = request_id
         return response
+
+
+def _elapsed_ms(started: float) -> float:
+    return round((time.perf_counter() - started) * 1000, 2)

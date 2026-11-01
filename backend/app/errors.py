@@ -6,7 +6,6 @@ including framework-level ones (validation, unknown route), uses one envelope:
     {"error": {"code": "...", "message": "...", "details": ...}}
 """
 
-import logging
 from typing import Any
 
 from fastapi import FastAPI, Request, status
@@ -14,8 +13,6 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
-
-logger = logging.getLogger(__name__)
 
 
 class DomainError(Exception):
@@ -90,8 +87,8 @@ def _http_error(_: Request, exc: Exception) -> JSONResponse:
     return JSONResponse(error_body(code, str(exc.detail)), exc.status_code, headers=exc.headers)
 
 
-def _unhandled_error(_: Request, exc: Exception) -> JSONResponse:
-    logger.error("unhandled_error", exc_info=exc)
+def _unhandled_error(_: Request, __: Exception) -> JSONResponse:
+    # Already logged with its traceback and request id by the request middleware.
     return JSONResponse(
         error_body("internal_error", "Internal server error"),
         status.HTTP_500_INTERNAL_SERVER_ERROR,
