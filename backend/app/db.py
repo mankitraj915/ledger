@@ -1,8 +1,10 @@
 """Database engine and session plumbing."""
 
 from collections.abc import Iterator
+from contextlib import contextmanager
+from typing import Annotated
 
-from fastapi import Request
+from fastapi import Depends, Request
 from sqlalchemy import Engine, MetaData, create_engine
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
@@ -43,3 +45,20 @@ def get_session(request: Request) -> Iterator[Session]:
     session_factory: sessionmaker[Session] = request.app.state.session_factory
     with session_factory() as session:
         yield session
+
+
+SessionDep = Annotated[Session, Depends(get_session)]
+
+
+@contextmanager
+def transaction(session: Session) -> Iterator[Session]:
+    """Make a use case's transaction boundary explicit: commit on success, else roll back.
+
+    Row locks taken inside the block are held until this commit or rollback.
+    """
+    try:
+        yield session
+        session.commit()
+    except BaseException:
+        session.rollback()
+        raise

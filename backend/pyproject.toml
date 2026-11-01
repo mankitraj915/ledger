@@ -29,3 +29,8 @@ testpaths = ["tests"]
 addopts = "-ra --strict-markers"
 pythonpath = ["."]
 markers = ["concurrency: races real Postgres transactions against each other"]
+filterwarnings = [
+    "error",
+    # Starlette 1.x nudges TestClient users towards httpx2; httpx is still supported.
+    "ignore:Using `httpx` with `starlette.testclient` is deprecated",
+]
