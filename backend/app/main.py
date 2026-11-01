@@ -19,8 +19,9 @@ from app.errors import NotFound, register_error_handlers
 from app.expenses.router import router as expenses_router
 from app.groups.router import router as groups_router
 from app.observability import configure_logging, install_request_logging
+from app.settlements.router import router as settlements_router
 
-ROUTERS = (health.router, auth_router, groups_router, expenses_router)
+ROUTERS = (health.router, auth_router, groups_router, expenses_router, settlements_router)
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
