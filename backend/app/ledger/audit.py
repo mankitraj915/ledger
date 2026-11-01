@@ -5,16 +5,18 @@ only trustworthy if replaying history reproduces it. Sum-to-zero alone does not
 prove that: a lost update can leave balances that still sum to zero but disagree
 with the journal (see tests/concurrency). This check catches both.
 
-Run against every group:  python -m app.ledger.audit   (exit status 1 on mismatch)
+Run against every group:  DATABASE_URL=... python -m app.ledger.audit
+(exit status 0 = consistent, 1 = mismatch found, 2 = usage error)
 """
 
+import os
 import sys
 from dataclasses import dataclass
 
 from sqlalchemy import Engine, func, select
 from sqlalchemy.orm import Session
 
-from app.config import get_settings
+from app.config import normalize_database_url
 from app.db import build_engine
 from app.expenses.models import Expense, Split
 from app.groups.models import Group, Membership
@@ -92,12 +94,20 @@ def audit_group(engine: Engine, group_id: int) -> GroupAudit:
 
 
 def main() -> int:
-    engine = build_engine(get_settings().database_url)
-    with Session(engine) as session:
-        group_ids = list(session.scalars(select(Group.id).order_by(Group.id)))
-    failures = [
-        audit for audit in (audit_group(engine, g) for g in group_ids) if not audit.consistent
-    ]
+    # Only DATABASE_URL: an operations job should not need the token-signing key.
+    url = os.environ.get("DATABASE_URL")
+    if not url:
+        print("Set DATABASE_URL to the database to audit", file=sys.stderr)
+        return 2
+    engine = build_engine(normalize_database_url(url))
+    try:
+        with Session(engine) as session:
+            group_ids = list(session.scalars(select(Group.id).order_by(Group.id)))
+        failures = [
+            audit for audit in (audit_group(engine, g) for g in group_ids) if not audit.consistent
+        ]
+    finally:
+        engine.dispose()
     for audit in failures:
         print(f"group {audit.group_id}: stored={audit.stored} journal={audit.journal}")
     print(f"audited {len(group_ids)} groups, {len(failures)} inconsistent")
