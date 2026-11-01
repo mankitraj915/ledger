@@ -30,7 +30,13 @@ class TestCreateAndRead:
 
     def test_invalid_payloads_are_rejected(self, client: TestClient, api: Api) -> None:
         owner = api.register()
-        for payload in ({"name": ""}, {"name": "   "}, {"name": "x", "currency": "EURO"}, {}):
+        for payload in (
+            {"name": ""},
+            {"name": "   "},
+            {"name": "x", "currency": "EURO"},
+            {"name": "x", "currency": "JPY"},  # zero-decimal: cents would be wrong
+            {},
+        ):
             response = client.post("/api/groups", json=payload, headers=owner.headers)
             assert response.status_code == 422, payload
 
