@@ -66,10 +66,11 @@ def lock_balances(
     * Order: Postgres places the LockRows step above the Sort, so rows are locked in
       ORDER BY order. Two transactions touching {A, B} both lock A first, so neither
       can hold B while waiting for A.
-    * populate_existing: the session may already hold one of these Membership objects
-      (the authorisation check loads the caller's own row). Without this option the
-      ORM would hand back that cached instance with its *pre-lock* balance, and the
-      lock would protect nothing.
+    * populate_existing: if anything in this request still holds one of these
+      Membership objects (say, the caller's own row from the authorisation check), the
+      session's identity map returns that cached instance, with its *pre-lock*
+      balance, instead of the row the locked SELECT just read. The lock would then
+      protect nothing. populate_existing makes the locked read overwrite it.
     * Raises NotGroupMembers if any user has no membership in the group.
     """
     wanted = sorted(set(user_ids))
