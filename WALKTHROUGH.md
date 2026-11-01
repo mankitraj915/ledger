@@ -283,18 +283,16 @@ weights. The UI never multiplies by 100: it parses the decimal string.
 
 ## 4. The three weakest points, and what I'd say about them
 
-### 4.1 It isn't deployed and CI hasn't run yet
+### 4.1 The UI is tested by hand, and nothing has been measured under load
 
-**Honest answer:** Everything is verified locally: the full test suite against real
-Postgres, lint, strict typing, image build, compose smoke test, and a manual browser
-run. But the GitHub Actions workflow has never executed and there's no public URL. I
-stopped at the point that needs account access (push to GitHub, connect Render).
-`render.yaml` makes it a few clicks. There are also no load or latency numbers, because
-I haven't measured any, and I won't quote any.
+**Honest answer:** The money logic, API and concurrency behaviour are tested in CI
+against real Postgres on every push, but the React UI has only unit tests for money
+parsing plus a manual run through the main flow in a browser. There are no load or
+latency numbers either, because none have been measured, and I won't quote any.
 
-**How I'd address it:** push, watch the first CI run go green, deploy the blueprint,
-then add a Playwright E2E test for the settle-up flow and a small k6 script so there
-are real numbers to discuss.
+**How I'd address it:** a Playwright E2E test of register → expense → settle up in CI,
+and a small k6 script hammering settle-up on one group, to report real p95 latency and
+lock-wait numbers.
 
 ### 4.2 Auth is the minimum, not production-grade
 
