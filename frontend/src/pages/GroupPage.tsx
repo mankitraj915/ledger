@@ -93,9 +93,16 @@ export function GroupPage() {
 
         <section className="card">
           <h2>Add an expense</h2>
+          {/* Re-mount both forms when membership changes so their defaults include new members. */}
           <ExpenseForm key={group.members.length} groupId={group.id} members={group.members} onAdded={reload} />
           <h2>Record a payment</h2>
-          <SettleUpForm groupId={group.id} members={group.members} preset={preset} onSettled={reload} />
+          <SettleUpForm
+            key={group.members.length}
+            groupId={group.id}
+            members={group.members}
+            preset={preset}
+            onSettled={reload}
+          />
         </section>
       </div>
 
