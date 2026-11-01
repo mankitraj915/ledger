@@ -1,0 +1,31 @@
+[project]
+name = "ledger"
+version = "0.1.0"
+description = "Expense splitting and settlement API"
+requires-python = ">=3.11"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF", "N", "S"]
+ignore = [
+    "S101",  # assert is fine in tests and for internal invariants
+    "N818",  # domain errors are named for what they mean (NotFound), not "...Error"
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S105", "S106", "S311"]  # test passwords, non-crypto randomness
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+plugins = ["pydantic.mypy"]
+files = ["app"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers"
+pythonpath = ["."]
+markers = ["concurrency: races real Postgres transactions against each other"]
