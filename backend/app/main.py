@@ -16,10 +16,11 @@ from app.auth.security import TokenCodec, build_password_hasher
 from app.config import Settings, get_settings
 from app.db import build_engine, build_session_factory
 from app.errors import NotFound, register_error_handlers
+from app.expenses.router import router as expenses_router
 from app.groups.router import router as groups_router
 from app.observability import configure_logging, install_request_logging
 
-ROUTERS = (health.router, auth_router, groups_router)
+ROUTERS = (health.router, auth_router, groups_router, expenses_router)
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
