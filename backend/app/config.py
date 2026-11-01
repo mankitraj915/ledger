@@ -38,4 +38,4 @@ def normalize_database_url(url: str) -> str:
 
 @lru_cache
 def get_settings() -> Settings:
-    return Settings()  # type: ignore[call-arg]  # populated from the environment
+    return Settings()  # jwt_secret and friends come from the environment
