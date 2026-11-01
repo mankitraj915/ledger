@@ -25,11 +25,15 @@ class Settings(BaseSettings):
     @field_validator("database_url")
     @classmethod
     def use_psycopg_driver(cls, url: str) -> str:
-        """Hosts hand out ``postgres://`` URLs; SQLAlchemy needs the driver spelled out."""
-        for prefix in ("postgres://", "postgresql://"):
-            if url.startswith(prefix):
-                return "postgresql+psycopg://" + url.removeprefix(prefix)
-        return url
+        return normalize_database_url(url)
+
+
+def normalize_database_url(url: str) -> str:
+    """Hosts hand out ``postgres://`` URLs; SQLAlchemy needs the driver spelled out."""
+    for prefix in ("postgres://", "postgresql://"):
+        if url.startswith(prefix):
+            return "postgresql+psycopg://" + url.removeprefix(prefix)
+    return url
 
 
 @lru_cache
