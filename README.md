@@ -88,7 +88,23 @@ exactly to the total, each is within one cent of fair, and the result is determi
 so the same expense always produces the same balances. In the browser check, Bob
 (user 1) got $15.01 and Ada (user 2) got $15.00. The frontend never computes
 `amount * 100` either (`0.29 * 100 === 28.999…`): it
-[parses the decimal string](frontend/src/money.ts#L9) straight into cents.
+[parses the decimal string](frontend/src/money.ts#L9) straight into cents. Before you
+add an expense, the form previews every share using
+[the same rule](frontend/src/present.ts#L27) (floor, then odd cents to the lowest ids),
+so the preview matches what the server stores. The server's allocation still decides.
+
+## Interface
+
+The UI is hand-built CSS: no component library, no CSS framework, no web font, no icon
+font. One idea drives it: the ledger column. Words sit on the left and right-aligned
+tabular figures on the right, separated by hairline rules. Colour is information only:
+- a grey ramp carries the interface;
+- one ink blue marks primary actions and focus;
+- green and red mean only "owed to you" and "you owe", and always come with those words.
+
+Every size, space, colour, radius and shadow is a token in
+[`styles.css`](frontend/src/styles.css). Light and dark are separate palettes, chosen per
+token with `light-dark()`.
 
 ## Status: what is verified
 
@@ -98,7 +114,9 @@ so the same expense always produces the same balances. In the browser check, Bob
 | Every setup and test command in this README, run from a fresh clone | works |
 | `ruff check`, `ruff format --check`, `mypy --strict` | clean, locally and in CI |
 | Alembic upgrade → `alembic check` → downgrade | clean, in CI |
-| Frontend type-check, 22 Vitest tests, production build | clean, locally and in CI |
+| Frontend type-check, 47 Vitest tests, production build | clean, locally |
+| UI at 360px and 1280px, light and dark: no horizontal scroll, screenshots reviewed | locally, headless Chrome |
+| Contrast computed from the tokens: text ≥ 4.5:1, form-control borders ≥ 3:1 (placeholders ≈ 3.4:1) | both themes |
 | Production Docker image build | succeeds, locally and in CI |
 | `docker compose up`: health, SPA, registration | worked locally |
 | Full UI flow in a real browser (register, group, member, expense, settle up) | worked locally |
@@ -270,7 +288,7 @@ backend/
     main.py db.py config.py errors.py observability.py health.py
   migrations/          Alembic, including the zero-sum trigger
   tests/ unit/ integration/ concurrency/
-frontend/src/          api.ts, money.ts, auth.tsx, pages/, components/
+frontend/src/          api.ts, money.ts, present.ts, validation.ts, auth.tsx, pages/, components/, styles.css
 ```
 
 ## What's next
