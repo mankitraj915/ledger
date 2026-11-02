@@ -114,7 +114,7 @@ token with `light-dark()`.
 | Every setup and test command in this README, run from a fresh clone | works |
 | `ruff check`, `ruff format --check`, `mypy --strict` | clean, locally and in CI |
 | Alembic upgrade → `alembic check` → downgrade | clean, in CI |
-| Frontend type-check, 47 Vitest tests, production build | clean, locally |
+| Frontend type-check, 47 Vitest tests, production build | clean, locally and in CI |
 | UI at 360px and 1280px, light and dark: no horizontal scroll, screenshots reviewed | locally, headless Chrome |
 | Contrast computed from the tokens: text ≥ 4.5:1, form-control borders ≥ 3:1 (placeholders ≈ 3.4:1) | both themes |
 | Production Docker image build | succeeds, locally and in CI |
