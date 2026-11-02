@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/mankitraj915/ledger/actions/workflows/ci.yml/badge.svg)](https://github.com/mankitraj915/ledger/actions/workflows/ci.yml)
 
-**Live demo:** _coming soon_
+**Live demo:** https://ledger-7dib.onrender.com
 
 **Ledger is an expense-splitting app** (a stripped-down Splitwise): create a group, add
 shared expenses, see who owes whom, settle up.
